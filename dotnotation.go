@@ -47,7 +47,7 @@ func CompileExtractor(expr string) (*Extractor, error) {
 	return &Extractor{e: e}, err
 }
 
-// CompileExtractor compiles the dotnotation expression and returns an Applier
+// CompileApplier compiles the dotnotation expression and returns an Applier
 func CompileApplier(expr string, op func(interface{}) interface{}) (*Applier, error) {
 	e, err := compile(expr, op)
 	return &Applier{e: e}, err
