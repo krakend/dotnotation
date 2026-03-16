@@ -30,7 +30,7 @@ func (e *Applier) Apply(data interface{}) {
 	}
 
 	pair := applyPool.Get().(*[2][]interface{})
-	current := append(pair[0], data)
+	current := append(pair[0], data) // skipcq: CRT-D0001
 	next := pair[1]
 
 	for _, step := range e.e.extractSteps {
@@ -67,7 +67,7 @@ func (e *Applier) Apply(data interface{}) {
 	applyPool.Put(pair)
 }
 
-func (e *Applier) applyLinear(data interface{}) {
+func (e *Applier) applyLinear(data interface{}) { // skipcq: GO-R1005
 	current := data
 
 	for _, step := range e.e.extractSteps {

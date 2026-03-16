@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestApply(t *testing.T) {
+func TestApply(t *testing.T) { // skipcq: GO-R1005
 	t.Run("TestWildcardStruct", func(t *testing.T) {
 		expected := map[string]interface{}{
 			"a": map[string]interface{}{
@@ -390,7 +390,7 @@ func TestApply(t *testing.T) {
 	})
 }
 
-func TestExtract(t *testing.T) {
+func TestExtract(t *testing.T) { // skipcq: GO-R1005
 	t.Run("TestWildcardStruct", func(t *testing.T) {
 		m, err := CompileExtractor("a.*.c")
 		if err != nil {
@@ -477,9 +477,8 @@ func TestExtract(t *testing.T) {
 			},
 		}
 		res := m.Extract(data)
-		expected := []interface{}{}
 		if len(res) != 0 {
-			t.Errorf("%v is not %v", res, expected)
+			t.Errorf("%v is not []", res)
 		}
 	})
 
