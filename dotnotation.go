@@ -18,39 +18,6 @@ type step struct {
 	ft    fieldType
 	key   string
 	index int
-	o     func(interface{}) interface{}
-}
-
-// Applier holds the compiled instructions to apply an operation to the compiled dotnotation path
-type Applier struct {
-	e *dotNotation
-}
-
-// Apply applies an operation to the compiled dotnotation path of the given data
-func (a *Applier) Apply(v interface{}) {
-	a.e.Evaluate(v)
-}
-
-// Extractor holds the compiled instructions to extract the compiled dotnotation path values
-type Extractor struct {
-	e *dotNotation
-}
-
-// Extract extracts the values in the compiled dotnotation path of the given data
-func (e *Extractor) Extract(v interface{}) []interface{} {
-	return e.e.Evaluate(v)
-}
-
-// CompileExtractor compiles the dotnotation expression and returns an Extractor
-func CompileExtractor(expr string) (*Extractor, error) {
-	e, err := compile(expr, nil)
-	return &Extractor{e: e}, err
-}
-
-// CompileApplier compiles the dotnotation expression and returns an Applier
-func CompileApplier(expr string, op func(interface{}) interface{}) (*Applier, error) {
-	e, err := compile(expr, op)
-	return &Applier{e: e}, err
 }
 
 func compile(expr string, op func(interface{}) interface{}) (*dotNotation, error) {
@@ -61,6 +28,7 @@ func compile(expr string, op func(interface{}) interface{}) (*dotNotation, error
 	parts := strings.Split(expr, ".")
 	steps := make([]step, 0, len(parts))
 	wc := 0
+
 	for _, p := range parts {
 		idx, err := strconv.Atoi(p)
 		isIndex := err == nil && idx >= 0
@@ -78,64 +46,41 @@ func compile(expr string, op func(interface{}) interface{}) (*dotNotation, error
 		}
 	}
 
-	steps[len(steps)-1].o = op
+	// if there's a wildcard on last step, we remove it from counter so it goes through Linear paths anyway
+	// since it does not need to allocate a slice while traversing the main path
+	if steps[len(steps)-1].ft == wildcardType {
+		wc--
+	}
+
+	var applyStep step
+	if op != nil {
+		applyStep = steps[len(steps)-1]
+		steps = steps[:len(steps)-1]
+	}
 
 	return &dotNotation{
-		steps: steps,
-		wc:    wc,
+		extractSteps: steps,
+		applyStep:    applyStep,
+		op:           op,
+		wc:           wc,
 	}, nil
 }
 
 type dotNotation struct {
-	steps []step
-	wc    int
+	extractSteps []step
+	applyStep    step
+	op           func(interface{}) interface{}
+	wc           int
 }
 
-func (e *dotNotation) Evaluate(data interface{}) []interface{} {
-	current := []interface{}{data}
-	next := make([]interface{}, 0, 4*e.wc+1)
-
-	for _, step := range e.steps {
-		next = next[:0]
-
-		switch step.ft {
-		case stringType:
-			next = stringTraverse(current, step, next)
-		case numericType:
-			next = numericTraverse(current, step, next)
-		case wildcardType:
-			next = wildcardTraverse(current, step, next)
-		}
-
-		if len(next) == 0 {
-			return next
-		}
-
-		current, next = next, current
-	}
-	return current
-}
-
-func wildcardTraverse(current []interface{}, step step, next []interface{}) []interface{} {
+func wildcardTraverse(current []interface{}, next []interface{}) []interface{} {
 	for _, n := range current {
 		switch v := n.(type) {
 		case []interface{}:
-			if step.o != nil {
-				for i := range v {
-					v[i] = step.o(v[i])
-				}
-				continue
-			}
 			next = append(next, v...)
 		case map[string]interface{}:
-			if step.o != nil {
-				for i := range v {
-					v[i] = step.o(v[i])
-				}
-				continue
-			}
-			for i := range v {
-				next = append(next, v[i])
+			for _, vv := range v {
+				next = append(next, vv)
 			}
 		}
 	}
@@ -146,20 +91,12 @@ func numericTraverse(current []interface{}, step step, next []interface{}) []int
 	for _, n := range current {
 		if m, ok := n.(map[string]interface{}); ok {
 			if v, exists := m[step.key]; exists {
-				if step.o != nil {
-					m[step.key] = step.o(v)
-					continue
-				}
 				next = append(next, v)
 			}
 			continue
 		}
 		if arr, ok := n.([]interface{}); ok {
 			if step.index < len(arr) {
-				if step.o != nil {
-					arr[step.index] = step.o(arr[step.index])
-					continue
-				}
 				next = append(next, arr[step.index])
 			}
 		}
@@ -171,10 +108,6 @@ func stringTraverse(current []interface{}, step step, next []interface{}) []inte
 	for _, n := range current {
 		if m, ok := n.(map[string]interface{}); ok {
 			if v, exists := m[step.key]; exists {
-				if step.o != nil {
-					m[step.key] = step.o(v)
-					continue
-				}
 				next = append(next, v)
 			}
 		}
