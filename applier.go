@@ -89,7 +89,9 @@ func (e *Applier) applyLinear(data interface{}) { // skipcq: GO-R1005
 					return
 				}
 				current = v
-			} else if arr, ok := current.([]interface{}); ok {
+				continue
+			}
+			if arr, ok := current.([]interface{}); ok {
 				if step.index >= len(arr) {
 					return
 				}
@@ -110,7 +112,9 @@ func (e *Applier) applyLinear(data interface{}) { // skipcq: GO-R1005
 			if v, exists := m[e.e.applyStep.key]; exists {
 				m[e.e.applyStep.key] = e.e.op(v)
 			}
-		} else if arr, ok := current.([]interface{}); ok {
+			return
+		}
+		if arr, ok := current.([]interface{}); ok {
 			if e.e.applyStep.index < len(arr) {
 				arr[e.e.applyStep.index] = e.e.op(arr[e.e.applyStep.index])
 			}
@@ -150,7 +154,9 @@ func numericApply(current []interface{}, step step, op func(interface{}) interfa
 			if v, exists := m[step.key]; exists {
 				m[step.key] = op(v)
 			}
-		} else if arr, ok := n.([]interface{}); ok {
+			continue
+		}
+		if arr, ok := n.([]interface{}); ok {
 			if step.index < len(arr) {
 				arr[step.index] = op(arr[step.index])
 			}

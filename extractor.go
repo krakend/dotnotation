@@ -80,7 +80,9 @@ func (e *Extractor) extractLinear(data interface{}) []interface{} {
 					return nil
 				}
 				current = v
-			} else if arr, ok := current.([]interface{}); ok {
+				continue
+			}
+			if arr, ok := current.([]interface{}); ok {
 				if step.index >= len(arr) {
 					return nil
 				}
@@ -94,7 +96,8 @@ func (e *Extractor) extractLinear(data interface{}) []interface{} {
 					res = append(res, v)
 				}
 				return res
-			} else if arr, ok := current.([]interface{}); ok {
+			}
+			if arr, ok := current.([]interface{}); ok {
 				res := make([]interface{}, 0, len(arr))
 				return append(res, arr...)
 			}

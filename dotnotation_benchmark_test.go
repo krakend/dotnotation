@@ -253,6 +253,8 @@ func BenchmarkDotNotationStrategiesApplier(b *testing.B) { // skipcq: GO-R1005
 	})
 }
 
+var result []interface{}
+
 func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 	b.Run("simple maps extractor", func(b *testing.B) {
 		m, err := CompileExtractor("a.b.c")
@@ -260,6 +262,7 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 			b.Fatal(err)
 		}
 		b.ResetTimer()
+		var tmp []interface{}
 		for i := 0; i < b.N; i++ {
 			data := map[string]interface{}{
 				"a": map[string]interface{}{
@@ -271,8 +274,9 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 					},
 				},
 			}
-			m.Extract(data)
+			tmp = m.Extract(data)
 		}
+		result = tmp
 	})
 	b.Run("long map structure extractor", func(b *testing.B) {
 		m, err := CompileExtractor("a.b.c.a.b.d.a.b.c")
@@ -280,6 +284,7 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 			b.Fatal(err)
 		}
 		b.ResetTimer()
+		var tmp []interface{}
 		for i := 0; i < b.N; i++ {
 			data := map[string]interface{}{
 				"a": map[string]interface{}{
@@ -318,8 +323,9 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 					},
 				},
 			}
-			m.Extract(data)
+			tmp = m.Extract(data)
 		}
+		result = tmp
 	})
 	b.Run("simple maps with wildcard extractor", func(b *testing.B) {
 		m, err := CompileExtractor("a.*.c")
@@ -327,6 +333,7 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 			b.Fatal(err)
 		}
 		b.ResetTimer()
+		var tmp []interface{}
 		for i := 0; i < b.N; i++ {
 			data := map[string]interface{}{
 				"a": map[string]interface{}{
@@ -338,8 +345,9 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 					},
 				},
 			}
-			m.Extract(data)
+			tmp = m.Extract(data)
 		}
+		result = tmp
 	})
 	b.Run("long map structure with wildcard extractor", func(b *testing.B) {
 		m, err := CompileExtractor("a.*.c.a.d.c.a.b.c.a.*.c")
@@ -347,6 +355,7 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 			b.Fatal(err)
 		}
 		b.ResetTimer()
+		var tmp []interface{}
 		for i := 0; i < b.N; i++ {
 			data := map[string]interface{}{
 				"a": map[string]interface{}{
@@ -403,8 +412,9 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 					},
 				},
 			}
-			m.Extract(data)
+			tmp = m.Extract(data)
 		}
+		result = tmp
 	})
 	b.Run("simple maps+slice extractor", func(b *testing.B) {
 		m, err := CompileExtractor("a.1.c")
@@ -412,6 +422,7 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 			b.Fatal(err)
 		}
 		b.ResetTimer()
+		var tmp []interface{}
 		for i := 0; i < b.N; i++ {
 			data := map[string]interface{}{
 				"a": []interface{}{
@@ -423,8 +434,9 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 					},
 				},
 			}
-			m.Extract(data)
+			tmp = m.Extract(data)
 		}
+		result = tmp
 	})
 	b.Run("simple maps+slice with wildcard extractor", func(b *testing.B) {
 		m, err := CompileExtractor("a.*.c")
@@ -432,6 +444,7 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 			b.Fatal(err)
 		}
 		b.ResetTimer()
+		var tmp []interface{}
 		for i := 0; i < b.N; i++ {
 			data := map[string]interface{}{
 				"a": []interface{}{
@@ -443,8 +456,9 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 					},
 				},
 			}
-			m.Extract(data)
+			tmp = m.Extract(data)
 		}
+		result = tmp
 	})
 	b.Run("long maps+slice structure with wildcards extractor", func(b *testing.B) {
 		m, err := CompileExtractor("a.*.0.0.d.c.a.b.c.a.*.*")
@@ -452,6 +466,7 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 			b.Fatal(err)
 		}
 		b.ResetTimer()
+		var tmp []interface{}
 		for i := 0; i < b.N; i++ {
 			data := map[string]interface{}{
 				"a": []interface{}{
@@ -490,7 +505,8 @@ func BenchmarkDotNotationStrategiesExtractor(b *testing.B) { // skipcq: GO-R1005
 					},
 				},
 			}
-			m.Extract(data)
+			tmp = m.Extract(data)
 		}
+		result = tmp
 	})
 }
